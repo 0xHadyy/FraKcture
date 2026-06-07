@@ -3,3 +3,5 @@ pandas
 matplotlib
 jupyterlab
 scikit-learn
+spacy
+click

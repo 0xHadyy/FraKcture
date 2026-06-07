@@ -9,7 +9,7 @@ from arxiv_fetch import ArxivClient
 
 
 def filter_papers(
-    categories=["cs.LG", "cs.AI", "cs.CL", "cs.CV", "stat.ML"], max_results=10000
+    categories=["cs.LG", "cs.AI", "cs.CL", "cs.CV", "stat.ML"], max_results=20
 ):
     papers = []
     dataset_path = "/home/hady/.cache/kagglehub/datasets/Cornell-University/arxiv/versions/288/arxiv-metadata-oai-snapshot.json"
