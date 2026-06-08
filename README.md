@@ -8,7 +8,7 @@
 
 - [x] ArXiv API
 - [x] Kaggle ArXiv dataset filtering
-- [ ] Preprocessing + Cleaning
+- [x] Preprocessing + Cleaning
 - [ ] TF-IDF
 - [ ] SVD
 - [ ] K-Means
