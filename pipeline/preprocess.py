@@ -89,7 +89,7 @@ class Preprocess:
         # remove latex
         # remove common words
         #
-        path = "./data/ArXiv_20260607.json"
+        path = "./data/ArXiv_20260605.json"
         data = self._load_json(path)
 
         # data =nlp(text.lower)
@@ -109,14 +109,29 @@ class Preprocess:
                     and not token.is_digit
                     and len(token.text) > 2
                 ):
-                    token_text = token.text
+                    if self.lemmatization:
+                        token_text = token.lemma_
+                    else:
+                        token_text = token.text
                     processed_tokens.append(token_text)
-            print(processed_tokens)
+
+            # for date in full_date:
+            # print(f"this is the date{date}")
+            # try:
+            # int_date = int(date)
+            # except ValueError:
+            #    int_date = 0
+            # if int_date > 1000:
+            #    pass
+            #    break
+
             processed_paper = {
                 "id": d["id"],
+                "year": d["year"],
                 "title": d["title"],
                 "abstract": d["abstract"],
                 "processed_text": processed_tokens,
+                "processed_text_joined": " ".join(processed_tokens),
                 "processed_text_length": len(processed_tokens),
                 "original_text_length": len(text),
             }
@@ -124,7 +139,7 @@ class Preprocess:
         return processed_data
 
 
-process = Preprocess()
+process = Preprocess(lemmatization=True)
 data = process.process(papers=None)
 
 filepath = f"{Path.cwd()}/data/processed_data.json"
