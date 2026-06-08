@@ -4,17 +4,16 @@ from pathlib import Path
 
 import spacy
 
-nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load("en_core_web_sm", disable=["parser", "ner"])
 
 
 class Preprocess:
-    def __init__(
-        self,
-        lemmatization=False,
-    ):
+    def __init__(self, lemmatization=False, data_path=""):
         self.lemmatization = lemmatization
+        self.data_path = data_path
         self.pattern = re.compile(r"\W+")
         self.custom_stop_words = {
+            # Original arXiv academic words
             "paper",
             "work",
             "study",
@@ -60,6 +59,76 @@ class Preprocess:
             "tasks",
             "application",
             "applications",
+            "propose",
+            "introduce",
+            "provide",
+            "present",
+            "compare",
+            "achieve",
+            "improve",
+            "address",
+            "include",
+            "enable",
+            "available",
+            "different",
+            "new",
+            "exist",
+            "require",
+            "perform",
+            "outperform",
+            "challenge",
+            "datum",
+            "time",
+            "real",
+            "design",
+            "art",
+            "level",
+            "process",
+            "set",
+            "quality",
+            "low",
+            "space",
+            "world",
+            "user",
+            "input",
+            "enhance",
+            "fine",
+            "strategy",
+            "end",
+            "target",
+            "point",
+            "specific",
+            "test",
+            "reduce",
+            "make",
+            "made",
+            "making",
+            "get",
+            "getting",
+            "got",
+            "see",
+            "seeing",
+            "seen",
+            "look",
+            "looking",
+            "looked",
+            "find",
+            "finding",
+            "found",
+            "type",
+            "types",
+            "way",
+            "ways",
+            "part",
+            "parts",
+            "set",
+            "sets",
+            "number",
+            "numbers",
+            "value",
+            "values",
+            "form",
+            "forms",
         }
 
     def _load_json(self, filepath):
@@ -85,22 +154,25 @@ class Preprocess:
         text = re.sub(r"\s+", " ", text)
         return text.strip()
 
-    def process(self, papers):
+    def process(self):
         # remove latex
         # remove common words
         #
-        path = "./data/ArXiv_20260605.json"
+        path = Path(self.data_path)
         data = self._load_json(path)
-
+        i = 0
         # data =nlp(text.lower)
-        processed_data = []
-        for d in data:
-            processed_tokens = []
-            text = f"{d['title']} {d['abstract']}"
+        texts = []
+        for paper in data:
+            text = f"{paper['title']} {paper['abstract']}"
             text = self._clean_text(text)
-            text = nlp(text.lower())
+            texts.append(text.lower())
+        processed_data = []
+        docs = nlp.pipe(texts, batch_size=200, n_process=4)
+        for d, doc in zip(data, docs):
+            processed_tokens = []
 
-            for token in text:
+            for token in doc:
                 if (
                     not token.is_stop
                     and token.text not in self.custom_stop_words
@@ -115,16 +187,6 @@ class Preprocess:
                         token_text = token.text
                     processed_tokens.append(token_text)
 
-            # for date in full_date:
-            # print(f"this is the date{date}")
-            # try:
-            # int_date = int(date)
-            # except ValueError:
-            #    int_date = 0
-            # if int_date > 1000:
-            #    pass
-            #    break
-
             processed_paper = {
                 "id": d["id"],
                 "year": d["year"],
@@ -133,16 +195,22 @@ class Preprocess:
                 "processed_text": processed_tokens,
                 "processed_text_joined": " ".join(processed_tokens),
                 "processed_text_length": len(processed_tokens),
-                "original_text_length": len(text),
+                "original_text_length": len(d["title"] + " " + d["abstract"]),
             }
+            i += 1
+            print(f"{i} paper processed")
             processed_data.append(processed_paper)
         return processed_data
 
 
-process = Preprocess(lemmatization=True)
-data = process.process(papers=None)
+dataset_path = "./data/Arxiv_sample_50K.json"
 
-filepath = f"{Path.cwd()}/data/processed_data.json"
+process = Preprocess(lemmatization=True, data_path=dataset_path)
+data = process.process()
+
+filepath = f"{Path.cwd()}/data/processed_data_50k_2.json"
 
 with open(filepath, "w", encoding="utf-8") as f:
     json.dump(data, f, indent=2, ensure_ascii=False)
+
+print("Preprocessing is done...")
