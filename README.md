@@ -1,6 +1,6 @@
 # FraKcture
 
-> Unsupervised topic discovery across 8,000+ ML research papers
+> Unsupervised topic discovery across ~50,000 ML research papers
 
 > using TF-IDF, LSA (Truncated SVD), and K-Means clustering.
 
@@ -23,5 +23,6 @@
 - [ ] Deploy live model using subset around 1k-5k papers
 - [ ] Finish version 0.2v
 - [ ] Integrate with VeKctor Engine
+- [ ] BERTopic
 
 > Component of VeKctor Engine
