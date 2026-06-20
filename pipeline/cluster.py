@@ -9,7 +9,6 @@ class Cluster:
         self.tf_idf = joblib.load("./models/tf_idf_vectorizer.joblib")
         self.svd = joblib.load("./models/truncated_svd.joblib")
         self.n_clusters = n_clusters
-        self.km = KMeans(n_clusters=self.n_clusters, random_state=42, n_init=10)
         self.silh_score = 0
         self.centriods = []
         self.top_n = top_n
@@ -21,7 +20,9 @@ class Cluster:
 
     def cluster(self):
         embedding = np.load("./data/lsa_embaddings_norm.npy")
-        labels = self.km.fit_predict(embedding)
+        km = KMeans(n_clusters=self.n_clusters, random_state=42, n_init=10)
+        labels = km.fit_predict(embedding)
+        joblib.dump(km, "./models/kmeans.joblib")
         self.silh_score = silhouette_score(embedding, labels)
         self.centriods = self.km.cluster_centers_
         return self.centriods, self.silh_score
