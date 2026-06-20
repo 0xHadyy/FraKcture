@@ -5,7 +5,7 @@ from sklearn.metrics import silhouette_score
 
 
 class Cluster:
-    def __init__(self, n_clusters=30, top_n=10):
+    def __init__(self, n_clusters=30, top_n=15):
         self.tf_idf = joblib.load("./models/tf_idf_vectorizer.joblib")
         self.svd = joblib.load("./models/truncated_svd.joblib")
         self.n_clusters = n_clusters
@@ -24,31 +24,25 @@ class Cluster:
         labels = km.fit_predict(embedding)
         joblib.dump(km, "./models/kmeans.joblib")
         self.silh_score = silhouette_score(embedding, labels)
-        self.centriods = self.km.cluster_centers_
+        self.centriods = km.cluster_centers_
         return self.centriods, self.silh_score
 
-    def map_cluster(self):
+    def map_cluster(self, km=None):
+        if km:
+            self.centriods = km.cluster_centers_
+        print(self.centriods.shape)
+        print(self.svd.components_.shape)
+        # so each cluster is represented by the componenets
         self.word_centroids = self.centriods @ self.svd.components_
 
+        terms = self.tf_idf.get_feature_names_out()
         for i in range(self.n_clusters):
             top_indices = np.argsort(self.word_centroids[i])[-self.top_n :][::-1]
-            terms = self.tf_idf.get_feature_names_out()
             top_terms = [terms[j] for j in top_indices]
-            self.clusters.append(top_terms)
+
+            self.clusters.append({"cluster": i, "keywords": top_terms})
 
         return self.clusters
 
 
 # documents -> DTM(tf-idf, feature extraction) -> Truncated SVD -> 50 important component -> cluster
-
-
-km = Cluster()
-
-km.cluster()
-clusters = km.map_cluster()
-i = 1
-for cluster in clusters:
-    print(f"Cluster{i}\n")
-
-    print(cluster)
-    i += 1
