@@ -1,6 +1,6 @@
 # FraKcture 0.1v
 
-> Unsupervised topic discovery across ~50,000 ML research papers , to study ML research from 2013-2016
+Unsupervised topic discovery across ~50,000 ML research papers , to study ML research evolution from 2013-2026
 
 ## Tasks
 
@@ -11,7 +11,9 @@
 - [x] TF-IDF
 - [x] SVD
 - [x] K-Means
-- [x] Clustering Analysis
+- [x] Artifacts
+- [ ] UMAP
+- [ ] Clustering Analysis
 - [ ] Inference & Questions
 - [ ] Streamlit
 - [ ] Finish version 0.1v
@@ -25,3 +27,4 @@
 - [ ] BERTopic
 
 > Component of VeKctor Engine
+> README to be update as the project goes on ....
