@@ -5,3 +5,5 @@ jupyterlab
 scikit-learn
 spacy
 click
+streamlit
+plotly
