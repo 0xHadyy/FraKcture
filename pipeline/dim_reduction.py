@@ -35,6 +35,7 @@ class DimReduction:
                 "title": papers["title"],
                 "year": papers["year"],
                 "topic": self.mapped_labels,
+                "distance": papers["distance"],
             }
         )
         self.umap_df.to_parquet("./data/df_umap.parquet", index=False)
