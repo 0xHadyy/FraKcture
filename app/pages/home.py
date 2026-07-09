@@ -7,7 +7,7 @@ st.set_page_config(page_title="FraKcture", page_icon="🎸", layout="wide")
 
 @st.cache_data
 def load_df():
-    df = pd.read_parquet("~/FraKcture/data/papers_with_topics.parquet")
+    df = pd.read_parquet("./data/papers_with_topics.parquet")
     return df
 
 
