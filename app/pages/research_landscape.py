@@ -12,13 +12,33 @@ def load_df():
     return df_umap
 
 
+@st.cache_data
+def load_papers():
+    papers = pd.read_parquet("./data/papers_with_topics.parquet")
+
+    return papers
+
+
 df = load_df()
 
 
-@st.cache_data
 def fig(df=None):
     fig = px.scatter(
-        df, x="x", y="y", color="topic", hover_data=["title", "year", "distance"]
+        df,
+        x="x",
+        y="y",
+        color="topic",
+        hover_data={
+            "x": False,
+            "y": False,
+            "title": True,
+            "year": True,
+            "topic": True,
+            "distance": ":.3f",
+            "id": True,
+        },
+        custom_data=["id"],
+        render_mode="webgl",
     )
     return fig
 
@@ -97,7 +117,7 @@ col1, col2, col3 = st.columns(3)
 with col1:
     st.metric("Visible Papers", len(filtered_df))
 with col3:
-    st.metric("Topics", f"{filtered_df['topic'].nunique()} Topic")
+    st.metric("Visible Topics", f"{filtered_df['topic'].nunique()} Topic")
 with col2:
     st.metric("Years", f"{years[0]}-{years[1]}")
 
@@ -118,10 +138,43 @@ fig.update_traces(
         opacity=0.65,
     )
 )
+event = st.plotly_chart(fig, use_container_width=True, on_select="rerun")
 
-st.plotly_chart(fig, use_container_width=True)
+
+def find_paper(paper_id):
+    papers = load_papers()
+    paper = papers.loc[papers["id"] == paper_id].iloc[0]
+    return paper
+
+
 st.caption(
     "Each point is a paper projected to 2D via UMAP from 50-dimensional LSA embeddings. "
     "Proximity indicates semantic similarity. Cluster labels are derived from K-Means centroids (k=30).",
     text_alignment="center",
 )
+st.info(
+    "💡 Click a paper to view its details below. Double-click anywhere on the plot to clear the selection and choose another paper."
+)
+
+st.markdown("## Paper Details", text_alignment="center")
+points = event.selection["points"]
+if points:
+    paper = find_paper(event.selection["points"][0]["customdata"][0])
+    topic = points[0]["customdata"][3]
+    st.badge(f"{topic}", color="red")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric("Year", paper["year"])
+
+    with col2:
+        st.metric("Distance", f"{paper['distance']:.3f}")
+    with st.container(border=True):
+        st.markdown(f"### {paper['title']}", text_alignment="center")
+        st.markdown("#### Abstract")
+        st.write(paper["abstract"])
+
+        st.link_button("Open on arXiv", f"https://arxiv.org/abs/{paper['id']}")
+
+else:
+    st.markdown("### No Paper Selected", text_alignment="center")
